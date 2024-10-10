@@ -3,10 +3,12 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define LOGIN_ADMIN "admin"
+#define SENHA_ADMIN "admin"
+
 typedef struct User{
     int id;
     char nome[255];
-    char cpf[15];
     char senha[80];
     char registros[255][100];
     char livros[255][10];
@@ -24,7 +26,7 @@ char* clear_newLine(char* string){
     return string;
 }
 
-bool usuario_existente(char* cpf){
+bool usuario_existente(char* nome){
     User ler_usuarios;
 
     FILE* arquivo = fopen("usuarios", "rb");
@@ -35,7 +37,7 @@ bool usuario_existente(char* cpf){
     }
 
     while(fread(&ler_usuarios,sizeof(User),1,arquivo)){
-        if(strcmp(cpf, ler_usuarios.cpf) == 0){
+        if(strcmp(nome, ler_usuarios.nome) == 0){
            
             fclose(arquivo);
             return true;
@@ -51,7 +53,7 @@ long seekUser(User* user_logado, FILE* arquivo){
     long pos = -1;
 
     while(fread(&usuarios,sizeof(User),1,arquivo)){
-        if(strcmp(user_logado->cpf, usuarios.cpf) == 0 && strcmp(user_logado->senha, usuarios.senha) == 0){
+        if(strcmp(user_logado->nome, usuarios.nome) == 0 && strcmp(user_logado->senha, usuarios.senha) == 0){
             
             pos = ftell(arquivo) - sizeof(User);
         }
@@ -82,19 +84,15 @@ bool cadastro(){
 
     puts("\tPágina de Cadastro");
 
-    printf("Insira seu CPF: ");
-    fgets(novousuario.cpf,sizeof(novousuario.cpf),stdin);
-    strcpy(novousuario.cpf, clear_newLine(novousuario.cpf));
+    printf("Insira seu Usuario: ");
+    fgets(novousuario.nome,sizeof(novousuario.nome),stdin);
+    strcpy(novousuario.nome, clear_newLine(novousuario.nome));
 
-    if(usuario_existente(novousuario.cpf) == true){
+    if(usuario_existente(novousuario.nome) == true || novousuario.nome == LOGIN_ADMIN){
         puts("Usuario existente.");
         return false;
     }
     
-    printf("Insira seu nome: ");
-    fgets(novousuario.nome,sizeof(novousuario.nome),stdin);
-    strcpy(novousuario.nome, clear_newLine(novousuario.nome));
-
     printf("Insira sua senha: ");
     fgets(novousuario.senha,sizeof(novousuario.senha),stdin);
     strcpy(novousuario.senha, clear_newLine(novousuario.senha));
@@ -123,9 +121,9 @@ bool login(User* user_logado){
     
     puts("\t\tPágina de Login");
 
-    printf("Digite seu CPF: ");
-    fgets(user_logado->cpf,sizeof(user_logado->cpf),stdin);
-    strcpy(user_logado->cpf, clear_newLine(user_logado->cpf));
+    printf("Digite seu Usuario: ");
+    fgets(user_logado->nome,sizeof(user_logado->nome),stdin);
+    strcpy(user_logado->nome, clear_newLine(user_logado->nome));
 
 
     printf("Digite sua senha: ");
@@ -145,7 +143,7 @@ bool login(User* user_logado){
     }
     else{
 
-        printf("CPF/Senha Incorretos.");
+        printf("Usuario/Senha Incorretos.");
         fclose(coletar_user);
 
         return false;
