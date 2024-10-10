@@ -17,6 +17,13 @@ void limpaBuffer(){
     while(c = getchar() != '\n' && c != EOF){ }
 }
 
+char* clear_newLine(char* string){
+
+    string[strcspn(string, "\n")] = 0;
+
+    return string;
+}
+
 bool usuario_existente(char* cpf){
     User ler_usuarios;
 
@@ -36,6 +43,21 @@ bool usuario_existente(char* cpf){
     }
     fclose(arquivo);
     return false;
+}
+
+long seekUser(User* user_logado, FILE* arquivo){
+    User usuarios;
+    
+    long pos = -1;
+
+    while(fread(&usuarios,sizeof(User),1,arquivo)){
+        if(strcmp(user_logado->cpf, usuarios.cpf) == 0 && strcmp(user_logado->senha, usuarios.senha) == 0){
+            
+            pos = ftell(arquivo) - sizeof(User);
+        }
+    }
+
+    return pos;
 }
 
 int gera_id(){
@@ -62,7 +84,8 @@ bool cadastro(){
 
     printf("Insira seu CPF: ");
     fgets(novousuario.cpf,sizeof(novousuario.cpf),stdin);
-    
+    strcpy(novousuario.cpf, clear_newLine(novousuario.cpf));
+
     if(usuario_existente(novousuario.cpf) == true){
         puts("Usuario existente.");
         return false;
@@ -70,8 +93,12 @@ bool cadastro(){
     
     printf("Insira seu nome: ");
     fgets(novousuario.nome,sizeof(novousuario.nome),stdin);
+    strcpy(novousuario.nome, clear_newLine(novousuario.nome));
+
     printf("Insira sua senha: ");
     fgets(novousuario.senha,sizeof(novousuario.senha),stdin);
+    strcpy(novousuario.senha, clear_newLine(novousuario.senha));
+
 
 
     novousuario.id = gera_id();
@@ -86,23 +113,77 @@ bool cadastro(){
     return true;
 }
 
+bool login(User* user_logado){
+
+    FILE* coletar_user = fopen("usuarios", "rb");
+    if(coletar_user == NULL){
+        puts("\nSem usuarios cadastrados.\n");
+        return false;
+    }
+    
+    puts("\t\tPágina de Login");
+
+    printf("Digite seu CPF: ");
+    fgets(user_logado->cpf,sizeof(user_logado->cpf),stdin);
+    strcpy(user_logado->cpf, clear_newLine(user_logado->cpf));
+
+
+    printf("Digite sua senha: ");
+    fgets(user_logado->senha,sizeof(user_logado->senha),stdin);
+    strcpy(user_logado->senha, clear_newLine(user_logado->senha));
+
+
+    long pos_user = seekUser(user_logado, coletar_user);
+
+    if( pos_user != -1){
+
+        fseek(coletar_user, pos_user, SEEK_SET);
+        fread(user_logado,sizeof(User),1,coletar_user);
+        fclose(coletar_user);
+
+        return true;
+    }
+    else{
+
+        printf("CPF/Senha Incorretos.");
+        fclose(coletar_user);
+
+        return false;
+    }
+}
+
+bool tela_inicial(){
+    puts("\tPágina de Login/Cadastro");
+
+    printf("[1] Login\n[2] Cadastro\n[3] Creditos\n");
+    
+    printf("\n\tOpcao: ");
+    char opcao = getchar();
+    limpaBuffer();
+
+    switch(opcao){
+        case '1':
+            return true;
+        case '2':
+            if(cadastro()) return true;
+        case '3':
+            /// Possivel pagina de creditos;
+            break;
+        default:
+            puts("Opcao Inválida");
+            break;
+    }
+
+
+}
 
 int main(void){
     User usuario;
-    
-    cadastro();
-    
-    FILE* arquivo = fopen("usuarios","rb");
 
-    if(arquivo == NULL){
-        printf("Não foi possivel abrir o arquivo usuario");
-        exit(1);
+    if(tela_inicial()) if(login(&usuario)){
+        puts("Logado com sucesso!");
     }
-
-    // while(fread(&usuario,sizeof(User),1,arquivo)){
-    //     printf("ID = %d   %s\n", usuario.id, usuario.nome);
-    // }
-
+    
 
     return 0;
 }
