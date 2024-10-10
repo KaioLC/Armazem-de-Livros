@@ -53,12 +53,12 @@ void AddLivro(){
     
     //--------------------------------------------------------------------------
 
-    fprintf(arquivo, "Título: %s", livro.titulo);
-    fprintf(arquivo, "Gênero: %s", livro.genero);
+    fprintf(arquivo, "Titulo: %s", livro.titulo);
+    fprintf(arquivo, "Genero: %s", livro.genero);
     fprintf(arquivo, "Autor: %s", livro.Autor);
-    fprintf(arquivo, "Páginas: %d\n", livro.Paginas);
+    fprintf(arquivo, "Paginas: %d\n", livro.Paginas);
     fprintf(arquivo, "Sinopse: %s", livro.sinopse);
-    fprintf(arquivo, "Código: %d \n", livro.codigo);
+    fprintf(arquivo, "Codigo: %d \n", livro.codigo);
     fprintf(arquivo, "-----------------------------------------------------------\n");
     
     
@@ -69,60 +69,36 @@ void AddLivro(){
 
 }
 
-//Função de Remoção de Livro com bugs
+void RemoverLivro(){
+    //Não consegui fazer essa função, muito dificil e eu não tenho capacidade
+}
+void ConsultarLivros(){
+    char linha[256];
 
-
-// void RemoverLivro(){
-//     struct Livro livro;
-//     FILE * arquivo = fopen("Livros.txt", "r");
-//     FILE * temp = fopen("temp.txt", "a");
-//     int codigoRemover;
-
-//     printf("Digite o codigo do livro que será removido: ");
-//     scanf("%d", &codigoRemover); 
-
-
-
-//     int removido = 0;
-
-//     while (fscanf(arquivo, "Título: %[^\n]\n", livro.titulo) != EOF) {
-//         fscanf(arquivo, "Gênero: %[^\n]\n", livro.genero);
-//         fscanf(arquivo, "Autor: %[^\n]\n", livro.Autor);
-//         fscanf(arquivo, "Páginas: %d\n", &livro.Paginas);
-//         fscanf(arquivo, "Sinopse: %[^\n]\n", livro.sinopse);
-//         fscanf(arquivo, "Código: %d\n", &livro.codigo);
-//         fgetc(arquivo);
-
-//         if (livro.codigo != codigoRemover) {
-//             fprintf(temp, "Título: %s\n", livro.titulo);
-//             fprintf(temp, "Gênero: %s\n", livro.genero);
-//             fprintf(temp, "Autor: %s\n", livro.Autor);
-//             fprintf(temp, "Páginas: %d\n", livro.Paginas);
-//             fprintf(temp, "Sinopse: %s\n", livro.sinopse);
-//             fprintf(temp, "Código: %d\n", livro.codigo);
-//         } else {
-//             removido = 1;
-//         }
-//     }
     
+    FILE*arquivo = fopen("Livros.txt", "r");
+    printf("\n-----------------------------------------------------------\n");
 
-//     fclose(arquivo);
-//     fclose(temp);
+    while (fgets(linha, sizeof(linha), arquivo)!= NULL)
+    {
+        printf("%s", linha);
+    }
+}
+void ConsultarUsuarios(){
+    char linha[256];
 
-//     if(removido == 1){
-//         remove("Livros.txt");
-//         rename("temp.txt", "Livros.txt");
-//         printf("Livro Removido!");
-//     }
-//     else{
-//         remove("temp.txt");
-//         printf("Não foi possivel encontrar o codigo desse livro!");
-//     }
+    
+    FILE*arquivo = fopen("Usuarios", "rb");
+    printf("\n-----------------------------------------------------------\n");
 
-
-// }
-
-
+    while (fgets(linha, sizeof(linha), arquivo)!= NULL)
+    {
+        printf("%s", linha);
+    }
+}
+void RemoverUsuarios(){
+    //Não tenho capacidade de Fazer isso
+}
 
 
 int main(void)
@@ -130,14 +106,28 @@ int main(void)
     int opcao; 
     menu();
     scanf("%d", &opcao);
-    if(opcao == 2){
+    if(opcao == 1){
+        ConsultarLivros();
+    }
+    else if(opcao == 2){
         getchar();
         AddLivro();
     }
     else if (opcao == 3){
         RemoverLivro();
     }
-
+    else if (opcao == 4){
+        ConsultarUsuarios();
+    }
+    else if(opcao == 5){
+        RemoverUsuarios();
+    }
+    else if (opcao == 6)
+    {
+        printf("Saindo...");
+        exit(1);
+    }
+    
 
     return 0;
 }
