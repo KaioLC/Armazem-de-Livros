@@ -176,7 +176,7 @@ bool tela_inicial(){
         case '2':
             if(cadastro()) return true;
         case '3':
-            /// Possivel pagina de creditos;
+            /// Possivel pagina de creditos (adicionar quando todo o código estiver feito);
             break;
         default:
             puts("Opcao Inválida");
