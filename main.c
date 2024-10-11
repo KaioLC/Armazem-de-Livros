@@ -37,13 +37,23 @@ bool usuario_existente(char* nome){
     }
 
     while(fread(&ler_usuarios,sizeof(User),1,arquivo)){
-        if(strcmp(nome, ler_usuarios.nome) == 0){
+        if(strcmp(nome, ler_usuarios.nome) == 0 || strcmp(nome,LOGIN_ADMIN) == 0){
            
             fclose(arquivo);
             return true;
         }
     }
     fclose(arquivo);
+    return false;
+}
+
+bool is_admin(char* login, char* senha){
+
+    if(strcmp(login, LOGIN_ADMIN) == 0 && strcmp(senha, SENHA_ADMIN) == 0){
+
+        return true; // admin fez login
+    }
+
     return false;
 }
 
@@ -88,7 +98,7 @@ bool cadastro(){
     fgets(novousuario.nome,sizeof(novousuario.nome),stdin);
     strcpy(novousuario.nome, clear_newLine(novousuario.nome));
 
-    if(usuario_existente(novousuario.nome) == true || novousuario.nome == LOGIN_ADMIN){
+    if(usuario_existente(novousuario.nome)){
         puts("Usuario existente.");
         return false;
     }
@@ -130,6 +140,7 @@ bool login(User* user_logado){
     fgets(user_logado->senha,sizeof(user_logado->senha),stdin);
     strcpy(user_logado->senha, clear_newLine(user_logado->senha));
 
+    if(is_admin(user_logado->nome, user_logado->senha)) return true;
 
     long pos_user = seekUser(user_logado, coletar_user);
 
@@ -179,7 +190,12 @@ int main(void){
     User usuario;
 
     if(tela_inicial()) if(login(&usuario)){
+        if(is_admin(usuario.nome, usuario.senha)){
+            printf("Bem vindo ADMINISTRADOR");
+        }
+        else{
         puts("Logado com sucesso!");
+        }
     }
     
 
