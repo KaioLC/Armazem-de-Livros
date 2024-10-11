@@ -6,15 +6,15 @@
 #include <stdlib.h>
 #include <time.h>
 
-struct Livro
+typedef struct Livro
 {
     char titulo[80];
     char genero[80];
-    char Autor[80];
-    int Paginas;
+    char autor[80];
+    int paginas;
     char sinopse[300];
     int codigo;
-};
+}Livro;
 
 
 
@@ -28,20 +28,26 @@ void menu(){
     printf("6- Sair\n");
 }
 void AddLivro(){
-    struct Livro livro;
+    Livro livro;
     FILE *arquivo = fopen("Livros.txt", "a");
+
+    if(arquivo == NULL){
+        printf("Primeiro Livro Cadastrado");
+    }
+
     printf("Adicione o Livro: \n");
     printf("Titulo: ");
     fgets(livro.titulo, sizeof(livro.titulo), stdin);
     printf("Genero: ");
     fgets(livro.genero, sizeof(livro.genero), stdin);
     printf("Autor: ");
-    fgets(livro.Autor, sizeof(livro.Autor), stdin);
+    fgets(livro.autor, sizeof(livro.autor), stdin);
     printf("Paginas: ");
-    scanf("%d", &livro.Paginas);
+    scanf("%d", &livro.paginas);
     getchar();
     printf("Sinopse: ");
     fgets(livro.sinopse, sizeof(livro.sinopse), stdin);
+    
     int min = 10000;
     int max = 100000; 
     int codigo;
@@ -53,14 +59,12 @@ void AddLivro(){
     
     //--------------------------------------------------------------------------
 
-    fprintf(arquivo, "Titulo: %s", livro.titulo);
-    fprintf(arquivo, "Genero: %s", livro.genero);
-    fprintf(arquivo, "Autor: %s", livro.Autor);
-    fprintf(arquivo, "Paginas: %d\n", livro.Paginas);
-    fprintf(arquivo, "Sinopse: %s", livro.sinopse);
-    fprintf(arquivo, "Codigo: %d \n", livro.codigo);
-    fprintf(arquivo, "-----------------------------------------------------------\n");
-    
+    fprintf(arquivo, "%d\n", livro.codigo);
+    fprintf(arquivo, "%s", livro.titulo);
+    fprintf(arquivo, "%s", livro.genero);
+    fprintf(arquivo, "%s", livro.autor);
+    fprintf(arquivo, "%d\n", livro.paginas);
+    fprintf(arquivo, "%s", livro.sinopse);
     
     fclose(arquivo);
 
@@ -73,15 +77,24 @@ void RemoverLivro(){
     //Não consegui fazer essa função, muito dificil e eu não tenho capacidade
 }
 void ConsultarLivros(){
-    char linha[256];
-
-    
+    Livro livro;
     FILE*arquivo = fopen("Livros.txt", "r");
+
+    if(arquivo == NULL){
+        printf("Nenhum Livro cadastrado.");
+        return;
+    }
     printf("\n-----------------------------------------------------------\n");
 
-    while (fgets(linha, sizeof(linha), arquivo)!= NULL)
-    {
-        printf("%s", linha);
+    while (fscanf(arquivo, "Codigo: %d\nTitulo: %[^\n]\nGenero: %[^\n]\nAutor: %[^\n]\nPaginas: %d\nSinospe: %[^\n]\n",&livro.codigo, livro.titulo, livro.genero, livro.autor, &livro.paginas, livro.sinopse) != EOF)
+    {   
+        printf("Título: %s\n", livro.titulo);
+        printf("Gênero: %s\n", livro.genero);
+        printf("Autor: %s\n", livro.autor);
+        printf("Páginas: %d\n", livro.paginas);
+        printf("Sinopse: %s\n", livro.sinopse);
+        printf("Código: %d\n", livro.codigo);
+        printf("-----------------------------------------------------------\n");
     }
 }
 void ConsultarUsuarios(){
