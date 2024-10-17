@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
+#include <signal.h> // para detectar interrupção repentina no programa
 
 #define LOGIN_ADMIN "admin"
 #define SENHA_ADMIN "admin"
@@ -13,6 +15,8 @@ typedef struct User{
     char registros[255][100];
     char livros[255][10];
 }User;
+
+enum progam_status {INIT=1, LOGGED=2, EXIT=3};
 
 void limpaBuffer(){
     int c;
@@ -186,8 +190,41 @@ bool tela_inicial(){
 
 }
 
+// funcao que armazena os registros do programa no arquivo log.txt
+void registros(int status, User* user_logado){
+    FILE* registros = fopen("log.txt", "a");
+    if(registros == NULL){
+        printf("Erro ao abrir o arquivo de registros");
+        return;
+    }
+    time_t seconds; // long long seconds
+
+    time(&seconds);
+    char* data_hora = ctime(&seconds);
+    data_hora[strcspn(data_hora, "\n")] = 0;
+
+    switch(status){
+        case INIT:
+            fprintf(registros,"--- %s Programa Iniciado ---\n",data_hora);
+            break;
+        case LOGGED:
+            fprintf(registros,"%s O usuario ID: %d %s conectou\n", user_logado->id,user_logado->nome);
+            puts("Registrou que o usuario fez login");
+            break;
+        case EXIT:
+            fprintf(registros,"%s Programa Finalizado\n",data_hora);
+            puts("Registrou que o programa foi finalizado");
+            break;
+        default:
+            printf("Impossível armazenar o registro");
+    }
+    fclose(registros);
+}
+
 int main(void){
     User usuario;
+
+    registros(INIT,&usuario);
 
     if(tela_inicial()) if(login(&usuario)){
         if(is_admin(usuario.nome, usuario.senha)){
@@ -195,6 +232,7 @@ int main(void){
         }
         else{
         puts("Logado com sucesso!");
+        registros(LOGGED,&usuario);
         }
     }
     
