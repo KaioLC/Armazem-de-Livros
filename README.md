@@ -16,4 +16,5 @@ Programa onde o usuario cadastra e aluga um livro disponivel no armazem, o progr
   - ### Remove Livro
   - ### Consulta usuarios
   - ### Remove usuario
+  - ### Ver o log
   - ### Sai
