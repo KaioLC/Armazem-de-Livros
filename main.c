@@ -10,8 +10,8 @@ struct Livro
 {
     char titulo[80];
     char genero[80];
-    char Autor[80];
-    int Paginas;
+    char autor[80];
+    int paginas;
     char sinopse[300];
     int codigo;
 };
@@ -29,16 +29,16 @@ void menu(){
 }
 void AddLivro(){
     struct Livro livro;
-    FILE *arquivo = fopen("Livros.txt", "a");
+    FILE *arquivo = fopen("Livros.bin", "ab");
     printf("Adicione o Livro: \n");
     printf("Titulo: ");
     fgets(livro.titulo, sizeof(livro.titulo), stdin);
     printf("Genero: ");
     fgets(livro.genero, sizeof(livro.genero), stdin);
     printf("Autor: ");
-    fgets(livro.Autor, sizeof(livro.Autor), stdin);
+    fgets(livro.autor, sizeof(livro.autor), stdin);
     printf("Paginas: ");
-    scanf("%d", &livro.Paginas);
+    scanf("%d", &livro.paginas);
     getchar();
     printf("Sinopse: ");
     fgets(livro.sinopse, sizeof(livro.sinopse), stdin);
@@ -53,16 +53,13 @@ void AddLivro(){
     
     //--------------------------------------------------------------------------
 
-    fprintf(arquivo, "Titulo: %s", livro.titulo);
-    fprintf(arquivo, "Genero: %s", livro.genero);
-    fprintf(arquivo, "Autor: %s", livro.Autor);
-    fprintf(arquivo, "Paginas: %d\n", livro.Paginas);
-    fprintf(arquivo, "Sinopse: %s", livro.sinopse);
-    fprintf(arquivo, "Codigo: %d \n", livro.codigo);
-    fprintf(arquivo, "-----------------------------------------------------------\n");
-    
-    
-    fclose(arquivo);
+    fwrite(livro.titulo, sizeof(livro.titulo), 1, arquivo);   // Grava o título
+    fwrite(livro.genero, sizeof(livro.genero), 1, arquivo);   // Grava o gênero
+    fwrite(livro.autor, sizeof(livro.autor), 1, arquivo);     // Grava o autor
+    fwrite(&livro.paginas, sizeof(livro.paginas), 1, arquivo); // Grava o número de páginas
+    fwrite(livro.sinopse, sizeof(livro.sinopse), 1, arquivo); // Grava a sinopse
+    fwrite(&livro.codigo, sizeof(livro.codigo), 1, arquivo);   // Grava o código
+    fclose(arquivo);  // Fecha o arquivo
 
     printf("Livro adicionado com sucesso!");
 
@@ -72,23 +69,41 @@ void AddLivro(){
 void RemoverLivro(){
     //Não consegui fazer essa função, muito dificil e eu não tenho capacidade
 }
-void ConsultarLivros(){
-    char linha[256];
-
+int ConsultarLivros(){
     
-    FILE*arquivo = fopen("Livros.txt", "r");
-    printf("\n-----------------------------------------------------------\n");
+    struct Livro livro;
 
-    while (fgets(linha, sizeof(linha), arquivo)!= NULL)
-    {
-        printf("%s", linha);
+    FILE *arquivo = fopen("livros.bin", "rb"); 
+    if (arquivo != NULL) {
+        while (fread(&livro, sizeof(livro), 1, arquivo) == 1) {
+            printf("Titulo: %s\n", livro.titulo);
+            printf("Genero: %s\n", livro.genero);
+            printf("Autor: %s\n", livro.autor);
+            printf("Paginas: %d\n", livro.paginas);
+            printf("Sinopse: %s\n", livro.sinopse);
+            printf("Codigo: %d\n", livro.codigo);
+            printf("-----------------------------------------------------------\n");
+        }
+        
+        if (feof(arquivo)) {
+            printf("Esses sao os livros disponiveis.\n");
+        } else {
+            printf("Ocorreu um erro na leitura do arquivo.\n");
+        }
+
+        fclose(arquivo); 
+    } else {
+        printf("Erro ao abrir o arquivo para leitura.\n");
     }
+
+    return 0;
 }
+
 void ConsultarUsuarios(){
     char linha[256];
 
     
-    FILE*arquivo = fopen("Usuarios", "rb");
+    FILE*arquivo = fopen("Usuarios.bin", "rb");
     printf("\n-----------------------------------------------------------\n");
 
     while (fgets(linha, sizeof(linha), arquivo)!= NULL)
