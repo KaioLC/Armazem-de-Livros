@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-struct Livro
+typedef struct Livro
 {
     char titulo[80];
     char genero[80];
@@ -14,7 +14,7 @@ struct Livro
     int paginas;
     char sinopse[300];
     int codigo;
-};
+}Livro;
 
 
 
@@ -28,7 +28,7 @@ void menu(){
     printf("6- Sair\n");
 }
 void AddLivro(){
-    struct Livro livro;
+    Livro livro;
     FILE *arquivo = fopen("Livros.bin", "ab");
     printf("Adicione o Livro: \n");
     printf("Titulo: ");
@@ -53,14 +53,8 @@ void AddLivro(){
     
     //--------------------------------------------------------------------------
 
-    fwrite(livro.titulo, sizeof(livro.titulo), 1, arquivo);   // Grava o título
-    fwrite(livro.genero, sizeof(livro.genero), 1, arquivo);   // Grava o gênero
-    fwrite(livro.autor, sizeof(livro.autor), 1, arquivo);     // Grava o autor
-    fwrite(&livro.paginas, sizeof(livro.paginas), 1, arquivo); // Grava o número de páginas
-    fwrite(livro.sinopse, sizeof(livro.sinopse), 1, arquivo); // Grava a sinopse
-    fwrite(&livro.codigo, sizeof(livro.codigo), 1, arquivo);   // Grava o código
-    fclose(arquivo);  // Fecha o arquivo
-
+    fwrite(&livro, sizeof(Livro), 1, arquivo);   // Grava o título
+    fclose(arquivo);
     printf("Livro adicionado com sucesso!");
 
 
@@ -71,11 +65,13 @@ void RemoverLivro(){
 }
 int ConsultarLivros(){
     
-    struct Livro livro;
+    Livro livro;
 
-    FILE *arquivo = fopen("livros.bin", "rb"); 
-    if (arquivo != NULL) {
-        while (fread(&livro, sizeof(livro), 1, arquivo) == 1) {
+    FILE *arquivo = fopen("Livros.bin", "rb"); 
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo para leitura.\n");
+    }
+    while (fread(&livro, sizeof(Livro), 1, arquivo)) {
             printf("Titulo: %s\n", livro.titulo);
             printf("Genero: %s\n", livro.genero);
             printf("Autor: %s\n", livro.autor);
@@ -85,16 +81,12 @@ int ConsultarLivros(){
             printf("-----------------------------------------------------------\n");
         }
         
-        if (feof(arquivo)) {
-            printf("Esses sao os livros disponiveis.\n");
-        } else {
-            printf("Ocorreu um erro na leitura do arquivo.\n");
-        }
-
-        fclose(arquivo); 
+    if (feof(arquivo)) {
+        printf("Esses sao os livros disponiveis.\n");
     } else {
-        printf("Erro ao abrir o arquivo para leitura.\n");
+        printf("Ocorreu um erro na leitura do arquivo.\n");
     }
+    fclose(arquivo);
 
     return 0;
 }
