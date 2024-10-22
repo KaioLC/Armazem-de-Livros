@@ -27,21 +27,27 @@ void menu(){
     printf("5- Remover Usuario \n");
     printf("6- Sair\n");
 }
-void AddLivro(){
-    Livro livro;
-    FILE *arquivo = fopen("Livros.bin", "ab");
+void AddLivro(Livro* livros){
+
+    FILE *arquivo = fopen("Livros.txt", "a");
+
+    if(arquivo == NULL){
+        printf("Primeiro Livro Cadastrado");
+    }
+
     printf("Adicione o Livro: \n");
     printf("Titulo: ");
-    fgets(livro.titulo, sizeof(livro.titulo), stdin);
+    fgets(livros->titulo, sizeof(livros->titulo), stdin);
     printf("Genero: ");
-    fgets(livro.genero, sizeof(livro.genero), stdin);
+    fgets(livros->genero, sizeof(livros->genero), stdin);
     printf("Autor: ");
-    fgets(livro.autor, sizeof(livro.autor), stdin);
+    fgets(livros->autor, sizeof(livros->autor), stdin);
     printf("Paginas: ");
-    scanf("%d", &livro.paginas);
+    scanf("%d", &livros->paginas);
     getchar();
     printf("Sinopse: ");
-    fgets(livro.sinopse, sizeof(livro.sinopse), stdin);
+    fgets(livros->sinopse, sizeof(livros->sinopse), stdin);
+    
     int min = 10000;
     int max = 100000; 
     int codigo;
@@ -49,12 +55,19 @@ void AddLivro(){
     srand(time(NULL));
     
     codigo = (rand() % (max -min + 1)) + min; 
-    livro.codigo = codigo; 
+    livros->codigo = codigo; 
     
     //--------------------------------------------------------------------------
 
-    fwrite(&livro, sizeof(Livro), 1, arquivo);   // Grava o título
+    fprintf(arquivo, "%d\n", livros->codigo);
+    fprintf(arquivo, "%s", livros->titulo);
+    fprintf(arquivo, "%s", livros->genero);
+    fprintf(arquivo, "%s", livros->autor);
+    fprintf(arquivo, "%d\n", livros->paginas);
+    fprintf(arquivo, "%s", livros->sinopse);
+    
     fclose(arquivo);
+
     printf("Livro adicionado com sucesso!");
 
 
@@ -63,39 +76,32 @@ void AddLivro(){
 void RemoverLivro(){
     //Não consegui fazer essa função, muito dificil e eu não tenho capacidade
 }
-int ConsultarLivros(){
-    
+void ListarLivros(){
     Livro livro;
+    FILE*arquivo = fopen("Livros.txt", "r");
 
-    FILE *arquivo = fopen("Livros.bin", "rb"); 
-    if (arquivo == NULL) {
-        printf("Erro ao abrir o arquivo para leitura.\n");
+    if(arquivo == NULL){
+        printf("Nenhum Livro cadastrado.");
+        return;
     }
-    while (fread(&livro, sizeof(Livro), 1, arquivo)) {
-            printf("Titulo: %s\n", livro.titulo);
-            printf("Genero: %s\n", livro.genero);
-            printf("Autor: %s\n", livro.autor);
-            printf("Paginas: %d\n", livro.paginas);
-            printf("Sinopse: %s\n", livro.sinopse);
-            printf("Codigo: %d\n", livro.codigo);
-            printf("-----------------------------------------------------------\n");
-        }
-        
-    if (feof(arquivo)) {
-        printf("Esses sao os livros disponiveis.\n");
-    } else {
-        printf("Ocorreu um erro na leitura do arquivo.\n");
-    }
-    fclose(arquivo);
+    printf("\n-----------------------------------------------------------\n");
 
-    return 0;
+    while (fscanf(arquivo, "Codigo: %d\nTitulo: %[^\n]\nGenero: %[^\n]\nAutor: %[^\n]\nPaginas: %d\nSinospe: %[^\n]\n",&livro.codigo, livro.titulo, livro.genero, livro.autor, &livro.paginas, livro.sinopse) != EOF)
+    {   
+        printf("Título: %s\n", livro.titulo);
+        printf("Gênero: %s\n", livro.genero);
+        printf("Autor: %s\n", livro.autor);
+        printf("Páginas: %d\n", livro.paginas);
+        printf("Sinopse: %s\n", livro.sinopse);
+        printf("Código: %d\n", livro.codigo);
+        printf("-----------------------------------------------------------\n");
+    }
 }
-
 void ConsultarUsuarios(){
     char linha[256];
 
     
-    FILE*arquivo = fopen("Usuarios.bin", "rb");
+    FILE*arquivo = fopen("Usuarios", "rb");
     printf("\n-----------------------------------------------------------\n");
 
     while (fgets(linha, sizeof(linha), arquivo)!= NULL)
@@ -114,7 +120,7 @@ int main(void)
     menu();
     scanf("%d", &opcao);
     if(opcao == 1){
-        ConsultarLivros();
+        ListarLivros();
     }
     else if(opcao == 2){
         getchar();
