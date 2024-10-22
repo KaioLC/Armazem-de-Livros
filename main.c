@@ -27,21 +27,21 @@ void menu(){
     printf("5- Remover Usuario \n");
     printf("6- Sair\n");
 }
-void AddLivro(){
-    Livro livro;
+void AddLivro(Livro* livros){
+    
     FILE *arquivo = fopen("Livros.bin", "ab");
     printf("Adicione o Livro: \n");
     printf("Titulo: ");
-    fgets(livro.titulo, sizeof(livro.titulo), stdin);
+    fgets(livros->titulo, sizeof(livros->titulo), stdin);
     printf("Genero: ");
-    fgets(livro.genero, sizeof(livro.genero), stdin);
+    fgets(livros->genero, sizeof(livros->genero), stdin);
     printf("Autor: ");
-    fgets(livro.autor, sizeof(livro.autor), stdin);
+    fgets(livros->autor, sizeof(livros->autor), stdin);
     printf("Paginas: ");
-    scanf("%d", &livro.paginas);
+    scanf("%d", &livros->paginas);
     getchar();
     printf("Sinopse: ");
-    fgets(livro.sinopse, sizeof(livro.sinopse), stdin);
+    fgets(livros->sinopse, sizeof(livros->sinopse), stdin);
     int min = 10000;
     int max = 100000; 
     int codigo;
@@ -49,35 +49,30 @@ void AddLivro(){
     srand(time(NULL));
     
     codigo = (rand() % (max -min + 1)) + min; 
-    livro.codigo = codigo; 
+    livros->codigo = codigo; 
     
     //--------------------------------------------------------------------------
 
-    fwrite(&livro, sizeof(Livro), 1, arquivo);   // Grava o título
+    fwrite(livros, sizeof(Livro), 1, arquivo);   // Grava o título
     fclose(arquivo);
     printf("Livro adicionado com sucesso!");
 
 
 }
-
-void RemoverLivro(){
-    //Não consegui fazer essa função, muito dificil e eu não tenho capacidade
-}
-int ConsultarLivros(){
+int ListarLivros(Livro* livros){
     
-    Livro livro;
 
     FILE *arquivo = fopen("Livros.bin", "rb"); 
     if (arquivo == NULL) {
         printf("Erro ao abrir o arquivo para leitura.\n");
     }
-    while (fread(&livro, sizeof(Livro), 1, arquivo)) {
-            printf("Titulo: %s\n", livro.titulo);
-            printf("Genero: %s\n", livro.genero);
-            printf("Autor: %s\n", livro.autor);
-            printf("Paginas: %d\n", livro.paginas);
-            printf("Sinopse: %s\n", livro.sinopse);
-            printf("Codigo: %d\n", livro.codigo);
+    while (fread(livros, sizeof(Livro), 1, arquivo)) {
+            printf("Titulo: %s\n", livros->titulo);
+            printf("Genero: %s\n", livros->genero);
+            printf("Autor: %s\n", livros->autor);
+            printf("Paginas: %d\n", livros->paginas);
+            printf("Sinopse: %s\n", livros->sinopse);
+            printf("Codigo: %d\n", livros->codigo);
             printf("-----------------------------------------------------------\n");
         }
         
@@ -90,6 +85,58 @@ int ConsultarLivros(){
 
     return 0;
 }
+
+void RemoverLivro(Livro* livros){
+    int codigo;
+    ListarLivros(livros);
+
+    puts("\t\tPagina de remover livros");
+    printf("Insira o codigo do livro que deseja remover: ");
+    scanf("%d",&codigo);
+
+    FILE* coletarbooks = fopen("Livros.bin", "rb+");
+    if(coletarbooks == NULL){
+        puts("Nenhum livro cadastrado");
+        return;
+    }
+
+    // Obtendo numero total de livros
+    fseek(coletarbooks,0, SEEK_END);
+    size_t pos = ftell(coletarbooks);
+    size_t qtd_livros = pos/sizeof(Livro);
+
+
+    // Coletando todos os livros
+    Livro* all_livros = malloc(qtd_livros * sizeof(Livro));
+    fseek(coletarbooks,0,SEEK_SET);
+    fread(all_livros, sizeof(Livro), qtd_livros, coletarbooks);
+    fclose(coletarbooks);
+    puts("TODOS OS LIVROS FORAM COLETADOS");
+
+    Livro* filteredBooks = malloc((qtd_livros - 1)*sizeof(Livro));
+    int cont = 0;
+
+    // Pegando os livros que nao foram removidos
+    for(unsigned int i = 0; i < qtd_livros; i++){
+        if(all_livros[i].codigo != codigo){
+            filteredBooks[cont] = all_livros[i];
+            cont++;
+        }
+    }
+    free(all_livros);
+
+    // Escrevendo os livros que nao foram removidos no arquivo
+    FILE* rewriteBooks = fopen("Livros.bin", "wb");
+    if(rewriteBooks == NULL){
+        puts("Impossivel reescrever livros");
+        return;
+    }
+    fwrite(filteredBooks,sizeof(Livro),cont,rewriteBooks);
+    fclose(rewriteBooks);
+    free(filteredBooks);
+
+}
+
 
 void ConsultarUsuarios(){
     char linha[256];
@@ -110,18 +157,19 @@ void RemoverUsuarios(){
 
 int main(void)
 {
+    Livro livros;
     int opcao; 
     menu();
     scanf("%d", &opcao);
     if(opcao == 1){
-        ConsultarLivros();
+        ListarLivros(&livros);
     }
     else if(opcao == 2){
         getchar();
-        AddLivro();
+        AddLivro(&livros);
     }
     else if (opcao == 3){
-        RemoverLivro();
+        RemoverLivro(&livros);
     }
     else if (opcao == 4){
         ConsultarUsuarios();
