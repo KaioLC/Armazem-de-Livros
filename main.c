@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -31,7 +30,7 @@ enum progam_status {INIT=1, LOGGED=2, EXIT=3};
 
 void limpaBuffer(){
     int c;
-    while(c = getchar() != '\n' && c != EOF){ }
+    while((c = getchar() != '\n') && (c != EOF)){ };
 }
 
 char* clear_newLine(char* string){
@@ -197,8 +196,7 @@ bool tela_inicial(){
             puts("Opcao Inválida");
             break;
     }
-
-
+    return false;
 }
 
 // funcao que armazena os registros do programa no arquivo log.txt
@@ -219,7 +217,7 @@ void registros(int status, User* user_logado){
             fprintf(registros,"--- %s Programa Iniciado ---\n",data_hora);
             break;
         case LOGGED:
-            fprintf(registros,"%s O usuario ID: %d %s conectou\n", user_logado->id,user_logado->nome);
+            fprintf(registros,"%s O usuario ID: %d %s conectou\n",data_hora,user_logado->id,user_logado->nome);
             puts("Registrou que o usuario fez login");
             break;
         case EXIT:
@@ -403,7 +401,6 @@ int main(void)
             {
                 printf("Saindo...");
                 exit(1);
-        >>>>>>> Armazenamento
             }
             
 
@@ -434,15 +431,10 @@ int main(void)
             {
                 printf("Saindo...");
                 exit(1);
-        >>>>>>> Armazenamento
             }
         
             }
     }
  
     return 0;
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> Armazenamento
