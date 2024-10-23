@@ -7,3 +7,18 @@
 --- Tue Oct 22 01:09:26 2024 Programa Iniciado ---
 --- Tue Oct 22 01:10:43 2024 Programa Iniciado ---
 --- Tue Oct 22 01:12:15 2024 Programa Iniciado ---
+--- Wed Oct 23 18:16:11 2024 Programa Iniciado ---
+--- Wed Oct 23 18:16:45 2024 Programa Iniciado ---
+Wed Oct 23 18:16:50 2024 O usuario ID: 0 kaio conectou
+--- Wed Oct 23 18:29:44 2024 Programa Iniciado ---
+--- Wed Oct 23 18:29:57 2024 O usuario ID: 1 Nome:joao conectou ---
+--- Wed Oct 23 18:37:30 2024 Programa Iniciado ---
+--- Wed Oct 23 18:37:36 2024 O usuario ID: 0 Nome:kaio conectou ---
+--- Wed Oct 23 18:38:07 2024 Programa Iniciado ---
+--- Wed Oct 23 18:38:13 2024 O usuario ID: 0 Nome:kaio conectou ---
+--- Wed Oct 23 18:40:54 2024 Programa Iniciado ---
+--- Wed Oct 23 18:41:09 2024 O usuario ID: 2 Nome:Fred conectou ---
+--- Wed Oct 23 18:41:17 2024 Programa Iniciado ---
+--- Wed Oct 23 18:42:21 2024 O usuario ID: 0 Nome:kaio conectou ---
+--- Wed Oct 23 18:42:37 2024 Programa Iniciado ---
+--- Wed Oct 23 18:42:40 2024 O usuario ID: 0 Nome:kaio conectou ---

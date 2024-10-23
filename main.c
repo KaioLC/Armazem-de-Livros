@@ -17,16 +17,16 @@ typedef struct User{
 
 typedef struct Livro
 {
+    int codigo;
     char titulo[80];
     char genero[80];
     char autor[80];
     int paginas;
     char sinopse[300];
-    int codigo;
 }Livro;
 
 
-enum progam_status {INIT=1, LOGGED=2, EXIT=3};
+enum progam_status {INIT, LOGGED, EXIT, ADD_BK, RMV_BK, RMV_USER};
 
 void limpaBuffer(){
     int c;
@@ -86,10 +86,10 @@ long seekUser(User* user_logado, FILE* arquivo){
     return pos;
 }
 
-int gera_id(){
+int gera_id(char* name_file){
     int id;
 
-    FILE* pegar_id = fopen("usuarios", "rb");
+    FILE* pegar_id = fopen(name_file, "rb");
     if(pegar_id == NULL){
         id = 0;
     }
@@ -106,7 +106,7 @@ int gera_id(){
 bool cadastro(){
     User novousuario;
 
-    puts("\tPágina de Cadastro");
+    puts("\tPagina de Cadastro");
 
     printf("Insira seu Usuario: ");
     fgets(novousuario.nome,sizeof(novousuario.nome),stdin);
@@ -123,7 +123,7 @@ bool cadastro(){
 
 
 
-    novousuario.id = gera_id();
+    novousuario.id = gera_id("usuarios");
 
     FILE* adicionar_usuario = fopen("usuarios", "ab");
     if(adicionar_usuario == NULL){
@@ -143,7 +143,7 @@ bool login(User* user_logado){
         return false;
     }
     
-    puts("\t\tPágina de Login");
+    puts("\t\tPagina de Login");
 
     printf("Digite seu Usuario: ");
     fgets(user_logado->nome,sizeof(user_logado->nome),stdin);
@@ -176,7 +176,7 @@ bool login(User* user_logado){
 }
 
 bool tela_inicial(){
-    puts("\tPágina de Login/Cadastro");
+    puts("\tPagina de Login/Cadastro");
 
     printf("[1] Login\n[2] Cadastro\n[3] Creditos\n");
     
@@ -200,7 +200,7 @@ bool tela_inicial(){
 }
 
 // funcao que armazena os registros do programa no arquivo log.txt
-void registros(int status, User* user_logado){
+void registros(int status, User* user_logado, int id_book){
     FILE* registros = fopen("log.txt", "a");
     if(registros == NULL){
         printf("Erro ao abrir o arquivo de registros");
@@ -217,12 +217,19 @@ void registros(int status, User* user_logado){
             fprintf(registros,"--- %s Programa Iniciado ---\n",data_hora);
             break;
         case LOGGED:
-            fprintf(registros,"%s O usuario ID: %d %s conectou\n",data_hora,user_logado->id,user_logado->nome);
-            puts("Registrou que o usuario fez login");
+            fprintf(registros,"--- %s O usuario [%d]  %s conectou ---\n",data_hora,user_logado->id,user_logado->nome);
             break;
         case EXIT:
             fprintf(registros,"%s Usuario: [%d] %s Saiu\n",data_hora, user_logado->id, user_logado->nome);
-            puts("Registrou que o programa foi finalizado");
+            break;
+        case ADD_BK:
+            fprintf(registros,"%s O Administrador adicionou um Livro -> ID [%d] \n",data_hora, id_book);
+            break;
+        case RMV_BK:
+            fprintf(registros,"%s O Administrador removeu um Livro -> ID [%d] \n",data_hora, id_book);
+            break;
+        case RMV_USER:
+            fprintf(registros,"%s O Administrador removeu um Usuario -> ID [%d] \n",data_hora, user_logado->id);
             break;
         default:
             printf("Impossível armazenar o registro");
@@ -231,7 +238,7 @@ void registros(int status, User* user_logado){
 }
 
 
-void menu(){
+void menu_adm(){
     printf("Bem-Vindo administrador! O que deseja fazer? \n \n");
     printf("1- Consultar Livros \n");
     printf("2- Adicionar Livro \n");
@@ -241,33 +248,39 @@ void menu(){
     printf("6- Sair\n");
 }
 void AddLivro(Livro* livros){
-    
+    puts("\n\t\tTodos os Livros Disponíveis \n");
     FILE *arquivo = fopen("Livros.bin", "ab");
     printf("Adicione o Livro: \n");
     printf("Titulo: ");
     fgets(livros->titulo, sizeof(livros->titulo), stdin);
+    strcpy(livros->titulo, clear_newLine(livros->titulo));
     printf("Genero: ");
     fgets(livros->genero, sizeof(livros->genero), stdin);
+    strcpy(livros->genero, clear_newLine(livros->genero));
     printf("Autor: ");
     fgets(livros->autor, sizeof(livros->autor), stdin);
+    strcpy(livros->autor, clear_newLine(livros->autor));
     printf("Paginas: ");
     scanf("%d", &livros->paginas);
     getchar();
     printf("Sinopse: ");
     fgets(livros->sinopse, sizeof(livros->sinopse), stdin);
-    int min = 10000;
-    int max = 100000; 
+    strcpy(livros->sinopse, clear_newLine(livros->sinopse));
+    // int min = 10000;
+    // int max = 100000; 
     int codigo;
     
-    srand(time(NULL));
+    // srand(time(NULL));
     
-    codigo = (rand() % (max -min + 1)) + min; 
+    codigo = gera_id("Livros.bin");//(rand() % (max -min + 1)) + min; 
     livros->codigo = codigo; 
     
     //--------------------------------------------------------------------------
 
     fwrite(livros, sizeof(Livro), 1, arquivo);   // Grava o título
     fclose(arquivo);
+
+    registros(ADD_BK,NULL,codigo);
     printf("Livro adicionado com sucesso!");
 
 
@@ -324,7 +337,6 @@ void RemoverLivro(Livro* livros){
     fseek(coletarbooks,0,SEEK_SET);
     fread(all_livros, sizeof(Livro), qtd_livros, coletarbooks);
     fclose(coletarbooks);
-    puts("TODOS OS LIVROS FORAM COLETADOS");
 
     Livro* filteredBooks = malloc((qtd_livros - 1)*sizeof(Livro));
     int cont = 0;
@@ -345,22 +357,22 @@ void RemoverLivro(Livro* livros){
         return;
     }
     fwrite(filteredBooks,sizeof(Livro),cont,rewriteBooks);
+    registros(RMV_BK,NULL,codigo);
+    printf("Livro com ID [%d] foi removido.",codigo);
     fclose(rewriteBooks);
     free(filteredBooks);
 
 }
 
 
-void ConsultarUsuarios(){
-    char linha[256];
-
+void ConsultarUsuarios(User* usuarios){
     
-    FILE*arquivo = fopen("Usuarios.bin", "rb");
+    FILE*arquivo = fopen("usuarios", "rb");
     printf("\n-----------------------------------------------------------\n");
 
-    while (fgets(linha, sizeof(linha), arquivo)!= NULL)
+    while (fread(usuarios, sizeof(User),1,arquivo))
     {
-        printf("%s", linha);
+        printf("ID: %d User: %s\n", usuarios->id, usuarios->nome);
     }
 }
 void RemoverUsuarios(){
@@ -372,14 +384,14 @@ int main(void)
 {
     User usuario;
     Livro livros;
-    registros(INIT,&usuario);
+    registros(INIT,&usuario,&livros);
 
     if(tela_inicial()) if(login(&usuario)){
         if(is_admin(usuario.nome, usuario.senha)){
             printf("Bem vindo ADMINISTRADOR");
 
             int opcao; 
-            menu();
+            menu_adm();
             scanf("%d", &opcao);
             if(opcao == 1){
                 ListarLivros(&livros);
@@ -392,7 +404,7 @@ int main(void)
                 RemoverLivro(&livros);
             }
             else if (opcao == 4){
-                ConsultarUsuarios();
+                ConsultarUsuarios(&usuario);
             }
             else if(opcao == 5){
                 RemoverUsuarios();
@@ -407,9 +419,9 @@ int main(void)
         }
         else{
             puts("Logado com sucesso!");
-            registros(LOGGED,&usuario);
+            registros(LOGGED,&usuario,&livros);
             int opcao; 
-            menu();
+            menu_adm();
             scanf("%d", &opcao);
             if(opcao == 1){
                 ListarLivros(&livros);
@@ -422,7 +434,7 @@ int main(void)
                 RemoverLivro(&livros);
             }
             else if (opcao == 4){
-                ConsultarUsuarios();
+                ConsultarUsuarios(&usuario);
             }
             else if(opcao == 5){
                 RemoverUsuarios();
