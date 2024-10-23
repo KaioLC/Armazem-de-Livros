@@ -214,13 +214,18 @@ void registros(int status, User* user_logado, int id_book){
 
     switch(status){
         case INIT:
-            fprintf(registros,"--- %s Programa Iniciado ---\n",data_hora);
+            fprintf(registros,">>> %s Programa Iniciado <<<\n",data_hora);
             break;
         case LOGGED:
-            fprintf(registros,"--- %s O usuario [%d]  %s conectou ---\n",data_hora,user_logado->id,user_logado->nome);
+            if(strcmp(user_logado->nome,"admin") == 0 && strcmp(user_logado->senha,"admin") == 0){
+                fprintf(registros,"--- %s O Administrador entrou ---\n",data_hora);
+            }
+            else{
+                fprintf(registros,"--- %s O usuario [%d]  %s conectou ---\n",data_hora,user_logado->id,user_logado->nome);
+            }
             break;
         case EXIT:
-            fprintf(registros,"%s Usuario: [%d] %s Saiu\n",data_hora, user_logado->id, user_logado->nome);
+            fprintf(registros,"<<< %s Sessão Encerrada >>>\n",data_hora);
             break;
         case ADD_BK:
             fprintf(registros,"%s O Administrador adicionou um Livro -> ID [%d] \n",data_hora, id_book);
@@ -239,7 +244,7 @@ void registros(int status, User* user_logado, int id_book){
 
 
 void menu_adm(){
-    printf("Bem-Vindo administrador! O que deseja fazer? \n \n");
+    printf("Menu do administrador! O que deseja fazer? \n \n");
     printf("1- Consultar Livros \n");
     printf("2- Adicionar Livro \n");
     printf("3- Remover Livro\n");
@@ -384,69 +389,48 @@ int main(void)
 {
     User usuario;
     Livro livros;
-    registros(INIT,&usuario,&livros);
+    registros(INIT,&usuario,0);
 
     if(tela_inicial()) if(login(&usuario)){
         if(is_admin(usuario.nome, usuario.senha)){
-            printf("Bem vindo ADMINISTRADOR");
+
+            registros(LOGGED,&usuario,0);
 
             int opcao; 
-            menu_adm();
-            scanf("%d", &opcao);
-            if(opcao == 1){
-                ListarLivros(&livros);
-            }
-            else if(opcao == 2){
-                getchar();
-                AddLivro(&livros);
-            }
-            else if (opcao == 3){
-                RemoverLivro(&livros);
-            }
-            else if (opcao == 4){
-                ConsultarUsuarios(&usuario);
-            }
-            else if(opcao == 5){
-                RemoverUsuarios();
-            }
-            else if (opcao == 6)
-            {
-                printf("Saindo...");
-                exit(1);
-            }
-            
+            while(true){
+                menu_adm();
+                scanf("%d", &opcao);
+                switch(opcao){
+                    case 1:
+                        ListarLivros(&livros);
+                        break;
+                    case 2:
+                        getchar();
+                        AddLivro(&livros);
+                        break;
+                    case 3:
+                        RemoverLivro(&livros);
+                        break;
+                    case 4:
+                        ConsultarUsuarios(&usuario);
+                        break;
+                    case 5:
+                        RemoverUsuarios();
+                        break;
+                    case 6:
+                        puts("Saindo...");
+                        registros(EXIT,&usuario,0);
+                        exit(1);
+                    default:
+                        puts("Opcao Invalida...");
+                        break;
+                }
 
+            }
         }
         else{
-            puts("Logado com sucesso!");
-            registros(LOGGED,&usuario,&livros);
-            int opcao; 
-            menu_adm();
-            scanf("%d", &opcao);
-            if(opcao == 1){
-                ListarLivros(&livros);
-            }
-            else if(opcao == 2){
-                getchar();
-                AddLivro(&livros);
-            }
-            else if (opcao == 3){
-                RemoverLivro(&livros);
-            }
-            else if (opcao == 4){
-                ConsultarUsuarios(&usuario);
-            }
-            else if(opcao == 5){
-                RemoverUsuarios();
-            }
-            else if (opcao == 6)
-            {
-                printf("Saindo...");
-                exit(1);
-            }
-        
-            }
+            puts("Essa página esta em desenvolvimento");
+        }
     }
- 
     return 0;
 }
