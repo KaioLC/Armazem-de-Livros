@@ -94,6 +94,7 @@ void back_to_menu(){
         printf("Aperta a tecla ENTER para voltar: ");
         // scanf("%d", &opcao);
         if(getchar()){
+            limpaBuffer();
             return;
         }
         puts("Nenhuma tecla foi pressionada");
@@ -347,7 +348,6 @@ int ListarLivros(Livro* livros){
         printf("Ocorreu um erro na leitura do arquivo.\n");
     }
     fclose(arquivo);
-    back_to_menu();
     return 0;
 }
 
@@ -478,7 +478,22 @@ void RemoverUsuarios(){
     printf("Usuario com ID [%d] foi removido.",id);
 }
 
+void to_hire_book(User* usuario, Livro* livros){
+    int codigo;
+    FILE* arquivo = fopen("Livros.bin", "rb");
 
+    puts("\t\tPagina para Alugar um Livro");
+    ListarLivros(livros);
+    printf("Insira o \x1b[31mcodigo\x1b[0m do Livro que deseja alugar: ");
+    scanf("%d", &codigo);
+    while(fread(livros,sizeof(Livro),1,arquivo)){
+        if(livros->codigo == codigo){
+            
+        }
+    }
+    
+
+}
 int main(void)
 {
     User usuario;
@@ -493,6 +508,7 @@ int main(void)
             
             while(true){
                 menu_adm();
+                printf("Opcao: ");
                 scanf("%d", &opcao);
                 limpaBuffer();
                 switch(opcao){
@@ -528,16 +544,19 @@ int main(void)
             
             while(true){
                 menu_user();
+                printf("Opcao: ");
                 scanf("%d", &opcao);
+                limpaBuffer();
                 switch(opcao){
                     case 1:
                         ListarLivros(&livros);
+                        back_to_menu();
                         break;
                     case 2:
                         puts("Consultar seus Livros");
                         break;
                     case 3:
-                        puts("Alugar um Livro");
+                        to_hire_book(&usuario, &livros);
                         break;
                     case 4:
                         puts("Devolver um Livro");
