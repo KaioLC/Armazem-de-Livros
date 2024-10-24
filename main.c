@@ -380,8 +380,55 @@ void ConsultarUsuarios(User* usuarios){
         printf("ID: %d User: %s\n", usuarios->id, usuarios->nome);
     }
 }
-void RemoverUsuarios(){
-    //Não tenho capacidade de Fazer isso
+void RemoverUsuarios(User* usuarios){
+    int id;
+    ConsultarUsuarios(usuarios);
+
+    puts("\t\tPagina de remover usuarios");
+    printf("Insira o ID do Usuario que deseja remover: ");
+    scanf("%d",&id);
+
+    FILE* coletarusers = fopen("usuarios", "rb+");
+    if(coletarusers == NULL){
+        puts("Nenhum usuario cadastrado");
+        return;
+    }
+
+    // Obtendo numero total de usuarios
+    fseek(coletarusers,0, SEEK_END);
+    size_t pos = ftell(coletarusers);
+    size_t qtd_usuarios = pos/sizeof(User);
+
+
+    // Coletando todos os usuarios
+    User* all_users = malloc(qtd_usuarios * sizeof(User));
+    fseek(coletarusers,0,SEEK_SET);
+    fread(all_users, sizeof(User), qtd_usuarios, coletarusers);
+    fclose(coletarusers);
+
+    User* filteredUsers = malloc((qtd_usuarios - 1)*sizeof(User));
+    int cont = 0;
+
+    // Pegando os usuarios que nao foram removidos
+    for(unsigned int i = 0; i < qtd_usuarios; i++){
+        if(all_users[i].id != id){
+            filteredUsers[cont] = all_users[i];
+            cont++;
+        }
+    }
+    free(all_users);
+
+    // Escrevendo os usuarios que nao foram removidos no arquivo
+    FILE* rewriteUsers = fopen("usuarios", "wb");
+    if(rewriteUsers == NULL){
+        puts("Impossivel reescrever usuarios");
+        return;
+    }
+    fwrite(filteredUsers,sizeof(User),cont,rewriteUsers);
+    registros(RMV_USER,NULL,id);
+    printf("Usuario com ID [%d] foi removido.",id);
+    fclose(rewriteUsers);
+    free(filteredUsers);
 }
 
 
@@ -415,7 +462,7 @@ int main(void)
                         ConsultarUsuarios(&usuario);
                         break;
                     case 5:
-                        RemoverUsuarios();
+                        RemoverUsuarios(&usuario);
                         break;
                     case 6:
                         puts("Saindo...");
