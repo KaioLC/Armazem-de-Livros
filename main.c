@@ -513,6 +513,8 @@ int main(void)
             }
         }
         else{
+            registros(LOGGED,&usuario,0);
+
             puts("Essa página esta em desenvolvimento");
         }
     }
