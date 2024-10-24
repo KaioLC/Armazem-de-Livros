@@ -1,5 +1,5 @@
 # Armazem-de-Livros
-Programa onde o usuario cadastra e aluga um livro disponivel no armazem.txt
+Programa onde o usuario cadastra e aluga um livro disponivel no armazem, o programa possui um log.txt que armazena todos os registros do programa
 
 
 ### Login
@@ -16,4 +16,5 @@ Programa onde o usuario cadastra e aluga um livro disponivel no armazem.txt
   - ### Remove Livro
   - ### Consulta usuarios
   - ### Remove usuario
+  - ### Ver o log
   - ### Sai

@@ -3,8 +3,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
-#include <signal.h> // para detectar interrupção repentina no programa
-
 #define LOGIN_ADMIN "admin"
 #define SENHA_ADMIN "admin"
 
@@ -212,7 +210,7 @@ void registros(int status, User* user_logado){
             puts("Registrou que o usuario fez login");
             break;
         case EXIT:
-            fprintf(registros,"%s Programa Finalizado\n",data_hora);
+            fprintf(registros,"%s Usuario: [%d] %s Saiu\n",data_hora, user_logado->id, user_logado->nome);
             puts("Registrou que o programa foi finalizado");
             break;
         default:
