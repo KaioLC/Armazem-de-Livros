@@ -91,7 +91,7 @@ void back_to_menu(){
     limpaBuffer();
     while(1){
         // puts("[1] Voltar");
-        printf("Aperta qualquer tecla para voltar: ");
+        printf("Aperta a tecla ENTER para voltar: ");
         // scanf("%d", &opcao);
         if(getchar()){
             return;
@@ -281,6 +281,14 @@ void menu_adm(){
     printf("5- Remover Usuario \n");
     printf("6- Sair\n");
 }
+void menu_user(){
+    puts("\n\n\tMenu Principal \n\n");
+    puts("[1] Consultar Livros Disponíveis");
+    puts("[2] Consultar seus Livros");
+    puts("[3] Alugar Livro");
+    puts("[4] Devolver Livro");
+    puts("[5] Sair");
+}
 void AddLivro(Livro* livros){
     puts("\n\t\tTodos os Livros Disponíveis \n");
     FILE *arquivo = fopen("Livros.bin", "ab");
@@ -321,13 +329,15 @@ int ListarLivros(Livro* livros){
     if (arquivo == NULL) {
         printf("Erro ao abrir o arquivo para leitura.\n");
     }
+
     while (fread(livros, sizeof(Livro), 1, arquivo)) {
-            printf("Titulo: %s\n", livros->titulo);
+            printf("-----------------------------------------------------------\n");
+            printf("\x1b[32mTitulo: %s\x1b[0m\n", livros->titulo);
             printf("Genero: %s\n", livros->genero);
             printf("Autor: %s\n", livros->autor);
             printf("Paginas: %d\n", livros->paginas);
             printf("Sinopse: %s\n", livros->sinopse);
-            printf("Codigo: %d\n", livros->codigo);
+            printf("\x1b[32mCodigo: %d\n\x1b[0m", livros->codigo);
             printf("-----------------------------------------------------------\n");
         }
         
@@ -337,7 +347,7 @@ int ListarLivros(Livro* livros){
         printf("Ocorreu um erro na leitura do arquivo.\n");
     }
     fclose(arquivo);
-
+    back_to_menu();
     return 0;
 }
 
@@ -474,16 +484,17 @@ int main(void)
     User usuario;
     Livro livros;
     registros(INIT,&usuario,0);
-
+    int opcao; 
     if(tela_inicial()) if(login(&usuario)){
         if(is_admin(usuario.nome, usuario.senha)){
 
             registros(LOGGED,&usuario,0);
 
-            int opcao; 
+            
             while(true){
                 menu_adm();
                 scanf("%d", &opcao);
+                limpaBuffer();
                 switch(opcao){
                     case 1:
                         ListarLivros(&livros);
@@ -514,8 +525,34 @@ int main(void)
         }
         else{
             registros(LOGGED,&usuario,0);
-
-            puts("Essa página esta em desenvolvimento");
+            
+            while(true){
+                menu_user();
+                scanf("%d", &opcao);
+                switch(opcao){
+                    case 1:
+                        ListarLivros(&livros);
+                        break;
+                    case 2:
+                        puts("Consultar seus Livros");
+                        break;
+                    case 3:
+                        puts("Alugar um Livro");
+                        break;
+                    case 4:
+                        puts("Devolver um Livro");
+                        break;
+                    case 5:
+                        puts("Sair");
+                        registros(EXIT,&usuario,0);
+                        exit(1);
+                        break;
+                    default:
+                        puts("Opcao Invalida");
+                        break;
+                }
+            
+            }
         }
     }
     return 0;

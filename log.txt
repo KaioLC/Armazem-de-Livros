@@ -1,0 +1,22 @@
+>>> Thu Oct 24 19:33:29 2024 Programa Iniciado <<<
+>>> Thu Oct 24 19:33:54 2024 Programa Iniciado <<<
+--- Thu Oct 24 19:34:02 2024 O usuario [0]  kaio conectou ---
+>>> Thu Oct 24 19:40:14 2024 Programa Iniciado <<<
+--- Thu Oct 24 19:40:16 2024 O usuario [0]  kaio conectou ---
+>>> Thu Oct 24 19:40:48 2024 Programa Iniciado <<<
+--- Thu Oct 24 19:40:51 2024 O usuario [0]  kaio conectou ---
+>>> Thu Oct 24 19:41:29 2024 Programa Iniciado <<<
+--- Thu Oct 24 19:41:31 2024 O usuario [0]  kaio conectou ---
+>>> Thu Oct 24 19:55:25 2024 Programa Iniciado <<<
+--- Thu Oct 24 19:55:38 2024 O usuario [0]  kaio conectou ---
+<<< Thu Oct 24 19:55:44 2024 Sessão Encerrada >>>
+>>> Thu Oct 24 19:55:59 2024 Programa Iniciado <<<
+--- Thu Oct 24 19:56:07 2024 O Administrador entrou ---
+Thu Oct 24 19:56:43 2024 O Administrador adicionou um Livro -> ID [1] 
+>>> Thu Oct 24 20:26:20 2024 Programa Iniciado <<<
+>>> Thu Oct 24 20:26:33 2024 Programa Iniciado <<<
+--- Thu Oct 24 20:26:39 2024 O usuario [0]  kaio conectou ---
+<<< Thu Oct 24 20:26:53 2024 Sessão Encerrada >>>
+>>> Thu Oct 24 20:27:57 2024 Programa Iniciado <<<
+--- Thu Oct 24 20:28:00 2024 O usuario [0]  kaio conectou ---
+<<< Thu Oct 24 20:28:17 2024 Sessão Encerrada >>>
