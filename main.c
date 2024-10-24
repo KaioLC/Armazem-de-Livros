@@ -86,15 +86,44 @@ long seekUser(User* user_logado, FILE* arquivo){
     return pos;
 }
 
-int gera_id(char* name_file){
+void back_to_menu(){
+    // int opcao;
+    limpaBuffer();
+    while(1){
+        // puts("[1] Voltar");
+        printf("Aperta qualquer tecla para voltar: ");
+        // scanf("%d", &opcao);
+        if(getchar()){
+            return;
+        }
+        puts("Nenhuma tecla foi pressionada");
+    }
+}
+int gera_id_user(){
     int id;
 
-    FILE* pegar_id = fopen(name_file, "rb");
+    FILE* pegar_id = fopen("usuarios", "rb");
     if(pegar_id == NULL){
         id = 0;
     }
     else{
         fseek(pegar_id,(-sizeof(User)),SEEK_END);
+        fread(&id,sizeof(int),1,pegar_id);
+        id++;
+    }
+    fclose(pegar_id);
+    
+    return id;
+}
+int gera_id_books(){
+    int id;
+    
+    FILE* pegar_id = fopen("Livros.bin", "rb");
+    if(pegar_id == NULL){
+        id = 0;
+    }
+    else{
+        fseek(pegar_id,(-sizeof(Livro)),SEEK_END);
         fread(&id,sizeof(int),1,pegar_id);
         id++;
     }
@@ -123,7 +152,7 @@ bool cadastro(){
 
 
 
-    novousuario.id = gera_id("usuarios");
+    novousuario.id = gera_id_user();
 
     FILE* adicionar_usuario = fopen("usuarios", "ab");
     if(adicionar_usuario == NULL){
@@ -200,7 +229,7 @@ bool tela_inicial(){
 }
 
 // funcao que armazena os registros do programa no arquivo log.txt
-void registros(int status, User* user_logado, int id_book){
+void registros(int status, User* user_logado, int id){
     FILE* registros = fopen("log.txt", "a");
     if(registros == NULL){
         printf("Erro ao abrir o arquivo de registros");
@@ -228,13 +257,13 @@ void registros(int status, User* user_logado, int id_book){
             fprintf(registros,"<<< %s Sessão Encerrada >>>\n",data_hora);
             break;
         case ADD_BK:
-            fprintf(registros,"%s O Administrador adicionou um Livro -> ID [%d] \n",data_hora, id_book);
+            fprintf(registros,"%s O Administrador adicionou um Livro -> ID [%d] \n",data_hora, id);
             break;
         case RMV_BK:
-            fprintf(registros,"%s O Administrador removeu um Livro -> ID [%d] \n",data_hora, id_book);
+            fprintf(registros,"%s O Administrador removeu um Livro -> ID [%d] \n",data_hora, id);
             break;
         case RMV_USER:
-            fprintf(registros,"%s O Administrador removeu um Usuario -> ID [%d] \n",data_hora, user_logado->id);
+            fprintf(registros,"%s O Administrador removeu um Usuario -> ID [%d] \n",data_hora, id);
             break;
         default:
             printf("Impossível armazenar o registro");
@@ -244,7 +273,7 @@ void registros(int status, User* user_logado, int id_book){
 
 
 void menu_adm(){
-    printf("Menu do administrador! O que deseja fazer? \n \n");
+    printf("\n\nMenu do administrador! O que deseja fazer? \n \n");
     printf("1- Consultar Livros \n");
     printf("2- Adicionar Livro \n");
     printf("3- Remover Livro\n");
@@ -267,22 +296,17 @@ void AddLivro(Livro* livros){
     strcpy(livros->autor, clear_newLine(livros->autor));
     printf("Paginas: ");
     scanf("%d", &livros->paginas);
-    getchar();
+    limpaBuffer();
     printf("Sinopse: ");
     fgets(livros->sinopse, sizeof(livros->sinopse), stdin);
     strcpy(livros->sinopse, clear_newLine(livros->sinopse));
-    // int min = 10000;
-    // int max = 100000; 
-    int codigo;
-    
-    // srand(time(NULL));
-    
-    codigo = gera_id("Livros.bin");//(rand() % (max -min + 1)) + min; 
+
+    int codigo = gera_id_books();
     livros->codigo = codigo; 
     
     //--------------------------------------------------------------------------
 
-    fwrite(livros, sizeof(Livro), 1, arquivo);   // Grava o título
+    fwrite(livros, sizeof(Livro), 1, arquivo); 
     fclose(arquivo);
 
     registros(ADD_BK,NULL,codigo);
@@ -317,9 +341,8 @@ int ListarLivros(Livro* livros){
     return 0;
 }
 
-void RemoverLivro(Livro* livros){
+void RemoverLivro(){
     int codigo;
-    ListarLivros(livros);
 
     puts("\t\tPagina de remover livros");
     printf("Insira o codigo do livro que deseja remover: ");
@@ -343,7 +366,7 @@ void RemoverLivro(Livro* livros){
     fread(all_livros, sizeof(Livro), qtd_livros, coletarbooks);
     fclose(coletarbooks);
 
-    Livro* filteredBooks = malloc((qtd_livros - 1)*sizeof(Livro));
+    Livro* filteredBooks = malloc((qtd_livros)*sizeof(Livro));
     int cont = 0;
 
     // Pegando os livros que nao foram removidos
@@ -354,7 +377,6 @@ void RemoverLivro(Livro* livros){
         }
     }
     free(all_livros);
-
     // Escrevendo os livros que nao foram removidos no arquivo
     FILE* rewriteBooks = fopen("Livros.bin", "wb");
     if(rewriteBooks == NULL){
@@ -371,7 +393,7 @@ void RemoverLivro(Livro* livros){
 
 
 void ConsultarUsuarios(User* usuarios){
-    
+    puts("\t\tLista de todos os usuarios!");
     FILE*arquivo = fopen("usuarios", "rb");
     printf("\n-----------------------------------------------------------\n");
 
@@ -379,10 +401,11 @@ void ConsultarUsuarios(User* usuarios){
     {
         printf("ID: %d User: %s\n", usuarios->id, usuarios->nome);
     }
+
+    return back_to_menu();
 }
-void RemoverUsuarios(User* usuarios){
+void RemoverUsuarios(){
     int id;
-    ConsultarUsuarios(usuarios);
 
     puts("\t\tPagina de remover usuarios");
     printf("Insira o ID do Usuario que deseja remover: ");
@@ -404,9 +427,18 @@ void RemoverUsuarios(User* usuarios){
     User* all_users = malloc(qtd_usuarios * sizeof(User));
     fseek(coletarusers,0,SEEK_SET);
     fread(all_users, sizeof(User), qtd_usuarios, coletarusers);
+    if(all_users == NULL){
+        puts("Erro na alocacao de memoria para all_users");
+        return;
+    }
     fclose(coletarusers);
 
-    User* filteredUsers = malloc((qtd_usuarios - 1)*sizeof(User));
+    User* filteredUsers = malloc((qtd_usuarios)*sizeof(User));
+    if(filteredUsers == NULL){
+        puts("Erro na alocacao de memoria para filteredUsers");
+        free(all_users);
+        return;
+    }
     int cont = 0;
 
     // Pegando os usuarios que nao foram removidos
@@ -422,13 +454,18 @@ void RemoverUsuarios(User* usuarios){
     FILE* rewriteUsers = fopen("usuarios", "wb");
     if(rewriteUsers == NULL){
         puts("Impossivel reescrever usuarios");
+        free(filteredUsers);
         return;
     }
+    
     fwrite(filteredUsers,sizeof(User),cont,rewriteUsers);
+   
+    free(filteredUsers);
+   
+    fclose(rewriteUsers);
+ 
     registros(RMV_USER,NULL,id);
     printf("Usuario com ID [%d] foi removido.",id);
-    fclose(rewriteUsers);
-    free(filteredUsers);
 }
 
 
@@ -456,13 +493,13 @@ int main(void)
                         AddLivro(&livros);
                         break;
                     case 3:
-                        RemoverLivro(&livros);
+                        RemoverLivro();
                         break;
                     case 4:
                         ConsultarUsuarios(&usuario);
                         break;
                     case 5:
-                        RemoverUsuarios(&usuario);
+                        RemoverUsuarios();
                         break;
                     case 6:
                         puts("Saindo...");
