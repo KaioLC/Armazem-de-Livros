@@ -12,7 +12,7 @@ typedef struct User{
     char nome[255];
     char senha[80];
     char registros[255][100];
-    char livros[255][10];
+    int livros[5];
 }User;
 
 typedef struct Livro
@@ -25,6 +25,12 @@ typedef struct Livro
     char sinopse[300];
 }Livro;
 
+typedef struct Rented
+{
+    int userID;
+    int bookID;
+    char data[255];
+}Rented;
 
 enum progam_status {INIT, LOGGED, EXIT, ADD_BK, RMV_BK, RMV_USER};
 
@@ -38,6 +44,15 @@ char* clear_newLine(char* string){
     string[strcspn(string, "\n")] = 0;
 
     return string;
+}
+
+char* get_date(){
+    time_t seconds; // long long seconds
+
+    time(&seconds);
+    char* data_hora = ctime(&seconds);
+    data_hora[strcspn(data_hora, "\n")] = 0;
+    return data_hora;
 }
 
 bool usuario_existente(char* nome){
@@ -94,7 +109,6 @@ void back_to_menu(){
         printf("Aperta a tecla ENTER para voltar: ");
         // scanf("%d", &opcao);
         if(getchar()){
-            limpaBuffer();
             return;
         }
         puts("Nenhuma tecla foi pressionada");
@@ -236,11 +250,12 @@ void registros(int status, User* user_logado, int id){
         printf("Erro ao abrir o arquivo de registros");
         return;
     }
-    time_t seconds; // long long seconds
+    // time_t seconds; // long long seconds
 
-    time(&seconds);
-    char* data_hora = ctime(&seconds);
-    data_hora[strcspn(data_hora, "\n")] = 0;
+    // time(&seconds);
+    // char* data_hora = ctime(&seconds);
+    // data_hora[strcspn(data_hora, "\n")] = 0;
+    char* data_hora = get_date();
 
     switch(status){
         case INIT:
@@ -284,7 +299,7 @@ void menu_adm(){
 }
 void menu_user(){
     puts("\n\n\tMenu Principal \n\n");
-    puts("[1] Consultar Livros Disponíveis");
+    puts("[1] Consultar Livros Disponiveis");
     puts("[2] Consultar seus Livros");
     puts("[3] Alugar Livro");
     puts("[4] Devolver Livro");
@@ -478,26 +493,51 @@ void RemoverUsuarios(){
     printf("Usuario com ID [%d] foi removido.",id);
 }
 
-void to_hire_book(User* usuario, Livro* livros){
+void rent_book(User* usuario, Livro* livros,Rented* alugar){
     int codigo;
-    FILE* arquivo = fopen("Livros.bin", "rb");
+
+    FILE* colectBook = fopen("Livros.bin", "rb");
+    if(colectBook == NULL){
+        puts("Incapaz de identificar livro para alugar");
+        exit(1);
+    }
+
+    FILE* writeRent = fopen("rented","ab+");
+    if(writeRent == NULL){
+        puts("Primeiro Usuario a alugar um livro!");
+    }
 
     puts("\t\tPagina para Alugar um Livro");
     ListarLivros(livros);
     printf("Insira o \x1b[31mcodigo\x1b[0m do Livro que deseja alugar: ");
     scanf("%d", &codigo);
-    while(fread(livros,sizeof(Livro),1,arquivo)){
+    while(fread(livros,sizeof(Livro),1,colectBook)){
         if(livros->codigo == codigo){
-            
+            alugar->userID = usuario->id;
+            alugar->bookID = livros->codigo;
+            strcpy(alugar->data,get_date());
+            break;
         }
     }
-    
+    fclose(colectBook);
 
+    if(strlen(alugar->data) == 0){
+        puts("Codigo invalido");
+    }
+    else{
+        fwrite(alugar,sizeof(Rented),1,writeRent);
+    }
+
+    fclose(writeRent);
+
+    return back_to_menu();
 }
 int main(void)
 {
     User usuario;
     Livro livros;
+    Rented alugados;
+
     registros(INIT,&usuario,0);
     int opcao; 
     if(tela_inicial()) if(login(&usuario)){
@@ -556,7 +596,7 @@ int main(void)
                         puts("Consultar seus Livros");
                         break;
                     case 3:
-                        to_hire_book(&usuario, &livros);
+                        rent_book(&usuario, &livros, &alugados);
                         break;
                     case 4:
                         puts("Devolver um Livro");
