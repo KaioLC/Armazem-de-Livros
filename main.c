@@ -12,7 +12,7 @@ typedef struct User{
     char nome[255];
     char senha[80];
     char registros[255][100];
-    char livros[255][10];
+    int livros[5];
 }User;
 
 typedef struct Livro
@@ -25,6 +25,12 @@ typedef struct Livro
     char sinopse[300];
 }Livro;
 
+typedef struct Rented
+{
+    int userID;
+    int bookID;
+    char data[255];
+}Rented;
 
 enum progam_status {INIT, LOGGED, EXIT, ADD_BK, RMV_BK, RMV_USER};
 
@@ -38,6 +44,15 @@ char* clear_newLine(char* string){
     string[strcspn(string, "\n")] = 0;
 
     return string;
+}
+
+char* get_date(){
+    time_t seconds; // long long seconds
+
+    time(&seconds);
+    char* data_hora = ctime(&seconds);
+    data_hora[strcspn(data_hora, "\n")] = 0;
+    return data_hora;
 }
 
 bool usuario_existente(char* nome){
@@ -235,11 +250,12 @@ void registros(int status, User* user_logado, int id){
         printf("Erro ao abrir o arquivo de registros");
         return;
     }
-    time_t seconds; // long long seconds
+    // time_t seconds; // long long seconds
 
-    time(&seconds);
-    char* data_hora = ctime(&seconds);
-    data_hora[strcspn(data_hora, "\n")] = 0;
+    // time(&seconds);
+    // char* data_hora = ctime(&seconds);
+    // data_hora[strcspn(data_hora, "\n")] = 0;
+    char* data_hora = get_date();
 
     switch(status){
         case INIT:
@@ -283,7 +299,7 @@ void menu_adm(){
 }
 void menu_user(){
     puts("\n\n\tMenu Principal \n\n");
-    puts("[1] Consultar Livros Disponíveis");
+    puts("[1] Consultar Livros Disponiveis");
     puts("[2] Consultar seus Livros");
     puts("[3] Alugar Livro");
     puts("[4] Devolver Livro");
@@ -347,7 +363,6 @@ int ListarLivros(Livro* livros){
         printf("Ocorreu um erro na leitura do arquivo.\n");
     }
     fclose(arquivo);
-    back_to_menu();
     return 0;
 }
 
@@ -478,11 +493,51 @@ void RemoverUsuarios(){
     printf("Usuario com ID [%d] foi removido.",id);
 }
 
+void rent_book(User* usuario, Livro* livros,Rented* alugar){
+    int codigo;
 
+    FILE* colectBook = fopen("Livros.bin", "rb");
+    if(colectBook == NULL){
+        puts("Incapaz de identificar livro para alugar");
+        exit(1);
+    }
+
+    FILE* writeRent = fopen("rented","ab+");
+    if(writeRent == NULL){
+        puts("Primeiro Usuario a alugar um livro!");
+    }
+
+    puts("\t\tPagina para Alugar um Livro");
+    ListarLivros(livros);
+    printf("Insira o \x1b[31mcodigo\x1b[0m do Livro que deseja alugar: ");
+    scanf("%d", &codigo);
+    while(fread(livros,sizeof(Livro),1,colectBook)){
+        if(livros->codigo == codigo){
+            alugar->userID = usuario->id;
+            alugar->bookID = livros->codigo;
+            strcpy(alugar->data,get_date());
+            break;
+        }
+    }
+    fclose(colectBook);
+
+    if(strlen(alugar->data) == 0){
+        puts("Codigo invalido");
+    }
+    else{
+        fwrite(alugar,sizeof(Rented),1,writeRent);
+    }
+
+    fclose(writeRent);
+
+    return back_to_menu();
+}
 int main(void)
 {
     User usuario;
     Livro livros;
+    Rented alugados;
+
     registros(INIT,&usuario,0);
     int opcao; 
     if(tela_inicial()) if(login(&usuario)){
@@ -493,6 +548,7 @@ int main(void)
             
             while(true){
                 menu_adm();
+                printf("Opcao: ");
                 scanf("%d", &opcao);
                 limpaBuffer();
                 switch(opcao){
@@ -528,16 +584,19 @@ int main(void)
             
             while(true){
                 menu_user();
+                printf("Opcao: ");
                 scanf("%d", &opcao);
+                limpaBuffer();
                 switch(opcao){
                     case 1:
                         ListarLivros(&livros);
+                        back_to_menu();
                         break;
                     case 2:
                         puts("Consultar seus Livros");
                         break;
                     case 3:
-                        puts("Alugar um Livro");
+                        rent_book(&usuario, &livros, &alugados);
                         break;
                     case 4:
                         puts("Devolver um Livro");
