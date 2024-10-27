@@ -11,8 +11,6 @@ typedef struct User{
     int id;
     char nome[255];
     char senha[80];
-    char registros[255][100];
-    int livros[5];
 }User;
 
 typedef struct Livro
@@ -32,7 +30,7 @@ typedef struct Rented
     char data[255];
 }Rented;
 
-enum progam_status {INIT, LOGGED, EXIT, ADD_BK, RMV_BK, RMV_USER};
+enum progam_status {INIT, LOGGED, EXIT, ADD_BK, RMV_BK, RMV_USER, RNTD_BK};
 
 void limpaBuffer(){
     int c;
@@ -102,12 +100,9 @@ long seekUser(User* user_logado, FILE* arquivo){
 }
 
 void back_to_menu(){
-    // int opcao;
-    limpaBuffer();
+    
     while(1){
-        // puts("[1] Voltar");
-        printf("Aperta a tecla ENTER para voltar: ");
-        // scanf("%d", &opcao);
+        printf("\n\nAperta a tecla ENTER para voltar: ");
         if(getchar()){
             return;
         }
@@ -250,11 +245,6 @@ void registros(int status, User* user_logado, int id){
         printf("Erro ao abrir o arquivo de registros");
         return;
     }
-    // time_t seconds; // long long seconds
-
-    // time(&seconds);
-    // char* data_hora = ctime(&seconds);
-    // data_hora[strcspn(data_hora, "\n")] = 0;
     char* data_hora = get_date();
 
     switch(status){
@@ -281,6 +271,8 @@ void registros(int status, User* user_logado, int id){
         case RMV_USER:
             fprintf(registros,"%s O Administrador removeu um Usuario -> ID [%d] \n",data_hora, id);
             break;
+        case RNTD_BK:
+            fprintf(registros,"%s O Usuario [%d]  %s Alugou Um Livro -> ID [%d] \n",data_hora, user_logado->id, user_logado->nome, id);
         default:
             printf("Impossível armazenar o registro");
     }
@@ -525,13 +517,47 @@ void rent_book(User* usuario, Livro* livros,Rented* alugar){
         puts("Codigo invalido");
     }
     else{
+        printf("Sucesso ao alugar o livro - %s", livros->titulo);
         fwrite(alugar,sizeof(Rented),1,writeRent);
+        registros(RNTD_BK,usuario,codigo);
     }
 
     fclose(writeRent);
 
     return back_to_menu();
 }
+
+void inventory_user(User* usuario, Livro* livros, Rented* alugados){
+    puts("\n\t\tSeus Livros Alugados\n\n");
+    
+    FILE* rented_file = fopen("rented", "rb");
+    if(rented_file == NULL){
+        puts("Nao foi possivel abrir o arquivo rented");
+        exit(1);
+    }
+    FILE* books_file = fopen("Livros.bin", "rb");
+    if(books_file == NULL){
+        puts("Não foi possivel abrir o arquivo Livros.bin");
+        exit(1);
+    }
+
+    while(fread(alugados,sizeof(Rented),1,rented_file)){
+        if(usuario->id == alugados->userID){
+            while(fread(livros, sizeof(Livro),1,books_file)){
+                if(livros->codigo == alugados->bookID){
+                    printf("%s - %s [%s]\n",alugados->data, livros->titulo, livros->autor);
+                    fseek(books_file,0,SEEK_SET);
+                    break;
+                }
+            }
+        }
+    }
+    fclose(rented_file);
+    fclose(books_file);
+
+    return back_to_menu();
+}
+
 int main(void)
 {
     User usuario;
@@ -593,7 +619,7 @@ int main(void)
                         back_to_menu();
                         break;
                     case 2:
-                        puts("Consultar seus Livros");
+                        inventory_user(&usuario, &livros, &alugados);
                         break;
                     case 3:
                         rent_book(&usuario, &livros, &alugados);
