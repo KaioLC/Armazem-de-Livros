@@ -115,6 +115,7 @@ int gera_id_user(){
     FILE* pegar_id = fopen("usuarios", "rb");
     if(pegar_id == NULL){
         id = 0;
+        return id;
     }
     else{
         fseek(pegar_id,(-sizeof(User)),SEEK_END);
