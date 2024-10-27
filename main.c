@@ -30,7 +30,7 @@ typedef struct Rented
     char data[255];
 }Rented;
 
-enum progam_status {INIT, LOGGED, EXIT, ADD_BK, RMV_BK, RMV_USER, RNTD_BK};
+enum progam_status {INIT, LOGGED, EXIT, ADD_BK, RMV_BK, RMV_USER, RNTD_BK, RTRN_BK};
 
 void limpaBuffer(){
     int c;
@@ -273,6 +273,10 @@ void registros(int status, User* user_logado, int id){
             break;
         case RNTD_BK:
             fprintf(registros,"%s O Usuario [%d]  %s Alugou Um Livro -> ID [%d] \n",data_hora, user_logado->id, user_logado->nome, id);
+            break;
+        case RTRN_BK:
+            fprintf(registros,"%s O Usuario [%d]  %s Devolveu Um Livro -> ID [%d] \n",data_hora, user_logado->id, user_logado->nome, id);
+            break;
         default:
             printf("Impossível armazenar o registro");
     }
@@ -440,7 +444,6 @@ void RemoverUsuarios(){
     size_t qtd_usuarios = pos/sizeof(User);
 
 
-    // Coletando todos os usuarios
     User* all_users = malloc(qtd_usuarios * sizeof(User));
     fseek(coletarusers,0,SEEK_SET);
     fread(all_users, sizeof(User), qtd_usuarios, coletarusers);
@@ -532,7 +535,7 @@ void inventory_user(User* usuario, Livro* livros, Rented* alugados){
     
     FILE* rented_file = fopen("rented", "rb");
     if(rented_file == NULL){
-        puts("Nao foi possivel abrir o arquivo rented");
+        puts("Nao existem livros alugados");
         exit(1);
     }
     FILE* books_file = fopen("Livros.bin", "rb");
@@ -545,7 +548,7 @@ void inventory_user(User* usuario, Livro* livros, Rented* alugados){
         if(usuario->id == alugados->userID){
             while(fread(livros, sizeof(Livro),1,books_file)){
                 if(livros->codigo == alugados->bookID){
-                    printf("%s - %s [%s]\n",alugados->data, livros->titulo, livros->autor);
+                    printf("%s - [%d] %s [%s]\n",alugados->data, livros->codigo, livros->titulo, livros->autor);
                     fseek(books_file,0,SEEK_SET);
                     break;
                 }
@@ -555,11 +558,80 @@ void inventory_user(User* usuario, Livro* livros, Rented* alugados){
     fclose(rented_file);
     fclose(books_file);
 
-    return back_to_menu();
+    return;
 }
 
 void return_books(User* usuario, Livro* livros, Rented* alugados){
-    printf("Aqui você devolve seus livros alugados");
+    int id;
+    printf("Pagina Devolucao de Livros");
+    inventory_user(usuario, livros, alugados);
+
+    printf("Insira o ID do livro que deseja devolver: ");
+    scanf("%d", &id);
+    limpaBuffer();
+
+    FILE* rented_file = fopen("rented", "rb");
+    if(rented_file == NULL){
+        puts("Nao foi possivel abrir arquivo de alugados");
+        exit(1);
+    }
+
+    fseek(rented_file, 0, SEEK_END); // colocando o ponteiro de leitura do arquivo no final do arquivo
+
+    unsigned int pos = ftell(rented_file);
+    unsigned int qtd = pos/sizeof(Rented); // calculando o numero unitario de livros
+    Rented books;
+    Rented* filtered = malloc((qtd - 1)*sizeof(Rented)); // alocando memoria de acordo com o valor do numero de livros menos 1
+    int count = 0;
+
+    fseek(rented_file, 0, SEEK_SET); // realocando o ponteiro pro começo do arquivo
+
+    bool valid_id = false;
+
+    // verificando se ID existe no arquivo e se pertence ao usuario
+    while(fread(&books,sizeof(Rented),1,rented_file)){
+        if(books.bookID == id && books.userID == usuario->id){
+            valid_id = true;
+            break;
+        }
+    }
+
+    fseek(rented_file,0,SEEK_SET);
+
+    // fazendo a filtragem dos livros que nao serao removidos
+    while(fread(&books,sizeof(Rented),1,rented_file)){
+        printf("\nColetando Livro [%d] do usuario [%d], LIVRO PRA SER REMOVIDO É [%d] do USUARIO [%d]\n", books.bookID, books.userID, id, usuario->id);
+        if(valid_id){
+            puts("Entrou na checagem de livros");
+            if(books.bookID != id && books.userID == usuario->id){
+                filtered[count] = books;
+                printf("\n User [%d] no filtered o ID eh [%d] salvando seu livro [%d]\n", usuario->id, filtered[count].userID, filtered[count].bookID);
+                count++;
+            }
+        }
+    }
+   
+    
+    if(!valid_id){
+        puts("ID inválido");
+    }
+    else{
+        fclose(rented_file);
+        remove("rented");
+
+        FILE* writeRented = fopen("rented", "wb");
+
+        fwrite(filtered,sizeof(Rented),(qtd - 1),writeRented);
+
+        free(filtered);
+
+        fclose(writeRented);
+
+        registros(RTRN_BK,usuario,id);
+    }
+    return back_to_menu();
+
+
 }
 
 int main(void)
@@ -624,6 +696,7 @@ int main(void)
                         break;
                     case 2:
                         inventory_user(&usuario, &livros, &alugados);
+                        back_to_menu();
                         break;
                     case 3:
                         rent_book(&usuario, &livros, &alugados);
