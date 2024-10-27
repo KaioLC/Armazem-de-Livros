@@ -297,3 +297,13 @@ Sun Oct 27 18:01:47 2024 O Usuario [0]  kaio Alugou Um Livro -> ID [6422478]
 Sun Oct 27 18:02:14 2024 O Usuario [0]  kaio Devolveu Um Livro -> ID [6422478] 
 Sun Oct 27 18:02:25 2024 O Usuario [0]  kaio Alugou Um Livro -> ID [6422478] 
 <<< Sun Oct 27 18:02:31 2024 Sessão Encerrada >>>
+>>> Sun Oct 27 18:23:03 2024 Programa Iniciado <<<
+>>> Sun Oct 27 18:23:36 2024 Programa Iniciado <<<
+>>> Sun Oct 27 18:23:52 2024 Programa Iniciado <<<
+>>> Sun Oct 27 18:24:14 2024 Programa Iniciado <<<
+>>> Sun Oct 27 18:25:20 2024 Programa Iniciado <<<
+>>> Sun Oct 27 18:25:45 2024 Programa Iniciado <<<
+>>> Sun Oct 27 18:25:56 2024 Programa Iniciado <<<
+>>> Sun Oct 27 18:26:43 2024 Programa Iniciado <<<
+--- Sun Oct 27 18:26:52 2024 O usuario [0]  kaio conectou ---
+<<< Sun Oct 27 18:26:56 2024 Sessão Encerrada >>>

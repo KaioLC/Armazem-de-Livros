@@ -215,7 +215,18 @@ bool login(User* user_logado){
     }
 }
 
+void creditos(){
+    puts("\n\n\t\t\tDesenvolvedores\n");
+    puts("\t\tKaio Custodio @github/KaioLC");
+    puts("\t\tHenrique Nicolini @github/hNicolini");
+
+    back_to_menu();
+}
+
 bool tela_inicial(){
+
+    INICIO:
+
     puts("\tPagina de Login/Cadastro");
 
     printf("[1] Login\n[2] Cadastro\n[3] Creditos\n");
@@ -223,20 +234,22 @@ bool tela_inicial(){
     printf("\n\tOpcao: ");
     char opcao = getchar();
     limpaBuffer();
-
-    switch(opcao){
-        case '1':
-            return true;
-        case '2':
-            if(cadastro()) return true;
-        case '3':
-            /// Possivel pagina de creditos;
-            break;
-        default:
-            puts("Opcao Inválida");
-            break;
-    }
-    return false;
+        
+        switch(opcao){
+            case '1':
+                return true;
+            case '2':
+                if(cadastro()) return true;
+            case '3':
+                creditos();
+                goto INICIO;
+                break;
+            default:
+                puts("Opcao Inválida");
+                break;
+                
+        }
+        return false;
 }
 
 // funcao que armazena os registros do programa no arquivo log.txt
