@@ -11,8 +11,6 @@ typedef struct User{
     int id;
     char nome[255];
     char senha[80];
-    char registros[255][100];
-    int livros[5];
 }User;
 
 typedef struct Livro
@@ -102,9 +100,9 @@ long seekUser(User* user_logado, FILE* arquivo){
 }
 
 void back_to_menu(){
-    limpaBuffer();
+    
     while(1){
-        printf("Aperta a tecla ENTER para voltar: ");
+        printf("\n\nAperta a tecla ENTER para voltar: ");
         if(getchar()){
             return;
         }
@@ -519,6 +517,7 @@ void rent_book(User* usuario, Livro* livros,Rented* alugar){
         puts("Codigo invalido");
     }
     else{
+        printf("Sucesso ao alugar o livro - %s", livros->titulo);
         fwrite(alugar,sizeof(Rented),1,writeRent);
         registros(RNTD_BK,usuario,codigo);
     }
@@ -547,6 +546,8 @@ void inventory_user(User* usuario, Livro* livros, Rented* alugados){
             while(fread(livros, sizeof(Livro),1,books_file)){
                 if(livros->codigo == alugados->bookID){
                     printf("%s - %s [%s]\n",alugados->data, livros->titulo, livros->autor);
+                    fseek(books_file,0,SEEK_SET);
+                    break;
                 }
             }
         }
