@@ -1,4 +1,4 @@
-# Armazem-de-Livros
+# Biblioteca Imaginária
 ### Sobre
 O programa foi feito para simular uma biblioteca virtual onde o usuário pode alugar e devolver livros cadastrados pelo administrador, os livros são apenas para ilustração, portanto não existem realmente e não podem ser lidos pelo usuário. Todas as ações como, iniciar programa, realizar login, cadastrar livro, remover livro, alugar livro, devolver livro, remover usuário e finalizar o programa são salvas com data e horário da ação em um arquivo ```log.txt```
 
