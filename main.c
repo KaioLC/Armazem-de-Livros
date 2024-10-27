@@ -488,6 +488,17 @@ void RemoverUsuarios(){
     printf("Usuario com ID [%d] foi removido.",id);
 }
 
+bool verify_rented(User* usuario, Rented* alugados,int id){
+    FILE* read_rented = fopen("rented", "rb");
+    // verificando se ID existe no arquivo e se pertence ao usuario
+    while(fread(alugados,sizeof(Rented),1,read_rented)){
+        if(alugados->bookID == id && alugados->userID == usuario->id){
+            return true;
+        }
+    }
+    return false;
+}
+
 void rent_book(User* usuario, Livro* livros,Rented* alugar){
     int codigo;
 
@@ -520,9 +531,14 @@ void rent_book(User* usuario, Livro* livros,Rented* alugar){
         puts("Codigo invalido");
     }
     else{
-        printf("Sucesso ao alugar o livro - %s", livros->titulo);
-        fwrite(alugar,sizeof(Rented),1,writeRent);
-        registros(RNTD_BK,usuario,codigo);
+        if(!verify_rented(usuario, alugar, codigo)){
+            printf("Sucesso ao alugar o livro - %s", livros->titulo);
+            fwrite(alugar,sizeof(Rented),1,writeRent);
+            registros(RNTD_BK,usuario,codigo);
+        }
+        else{
+            puts("Voce ja alugou esse livro.");
+        }
     }
 
     fclose(writeRent);
@@ -705,7 +721,7 @@ int main(void)
                         return_books(&usuario, &livros, &alugados);
                         break;
                     case 5:
-                        puts("Sair");
+                        puts("Saindo...");
                         registros(EXIT,&usuario,0);
                         exit(1);
                         break;
