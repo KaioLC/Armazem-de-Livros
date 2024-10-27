@@ -558,6 +558,10 @@ void inventory_user(User* usuario, Livro* livros, Rented* alugados){
     return back_to_menu();
 }
 
+void return_books(User* usuario, Livro* livros, Rented* alugados){
+    printf("Aqui você devolve seus livros alugados");
+}
+
 int main(void)
 {
     User usuario;
@@ -625,7 +629,7 @@ int main(void)
                         rent_book(&usuario, &livros, &alugados);
                         break;
                     case 4:
-                        puts("Devolver um Livro");
+                        return_books(&usuario, &livros, &alugados);
                         break;
                     case 5:
                         puts("Sair");
